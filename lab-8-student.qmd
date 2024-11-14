@@ -1,15 +1,24 @@
 ---
 title: "Lab 8: Searching for Efficiency"
-author: "Your name here!"
-format: html
+author: "Eva Moylan"
+date: "11/14/24"
+format: 
+  html:  
+    embed-resources: true
+    code-tools: true
 editor: source
-embed-resources: true
+execute: 
+  echo: true
+code-fold: true
+theme: sandstone
 ---
 
 ```{r}
 #| label: pacakges
+#| message: false
 
 library(tidyverse)
+library(here)
 ```
 
 For this week's lab, we will be revisiting questions from previous lab
@@ -20,6 +29,7 @@ folder, so all you need to do is read them in. 🙃
 
 ```{r}
 #| label: read-in-old-data
+#| message: false
 
 # Data from Lab 2
 surveys <- read_csv(here::here("data", "surveys.csv"))
@@ -44,6 +54,11 @@ each variable, with the datatype of that variable immediately below it's name.
 ```{r}
 #| label: map-data-types-of-surveys
 
+tibble(Variable = names(surveys),
+       Data_Type = map_chr(.x = surveys,
+                           .f = ~ typeof(.x))) |>
+  pivot_wider(names_from = Variable,
+              values_from = Data_Type)
 
 ```
 
@@ -62,7 +77,15 @@ list output back into a data frame.
 ```{r}
 #| label: map-to-mutate-columns
 
-
+evals |>
+  map_at(.at = c("teacher_id",
+                 "weekday",
+                 "academic_degree",
+                 "seniority",
+                 "gender"),
+         .f = as.factor) |>
+  bind_cols()
+  
 ```
 
 Next up, we're going revisit Question 7 which asked:
