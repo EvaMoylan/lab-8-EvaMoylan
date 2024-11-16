@@ -19,6 +19,7 @@ theme: sandstone
 
 library(tidyverse)
 library(here)
+library(kableExtra)
 ```
 
 For this week's lab, we will be revisiting questions from previous lab
@@ -58,7 +59,9 @@ tibble(Variable = names(surveys),
        Data_Type = map_chr(.x = surveys,
                            .f = ~ typeof(.x))) |>
   pivot_wider(names_from = Variable,
-              values_from = Data_Type)
+              values_from = Data_Type) |>
+  knitr::kable() |>
+  kable_styling()
 
 ```
 
@@ -84,7 +87,9 @@ evals |>
                  "seniority",
                  "gender"),
          .f = as.factor) |>
-  bind_cols()
+  bind_cols() |>
+  knitr::kable() |>
+  kable_styling()
   
 ```
 
@@ -111,11 +116,47 @@ I'm using the `sen_level` classification from Challenge 3
 ```{r}
 #| label: double-pivot-for-summary-table
 
-
+evals |>
+  distinct(teacher_id,
+           .keep_all = TRUE) |>
+  select(teacher_id,
+         sex, 
+         seniority,
+         academic_degree) |>
+  mutate(seniority = if_else(seniority <= 4,
+                             "Junior (4 years or less)",
+                             "Senior (more than 4 years)")) |>
+  pivot_longer(cols = -teacher_id,
+               names_to = "teacher_attribute",
+               values_to = "teacher_status") |>
+  count(teacher_attribute, teacher_status) |>
+  pivot_wider(id_cols = -teacher_attribute,
+              names_from = teacher_status,
+              values_from = n) |>
+  select(female,
+         male,
+         'Junior (4 years or less)',
+         'Senior (more than 4 years)',
+         no_dgr,
+         ma,
+         dr,
+         prof) |>
+  rename(Female = female,
+         Male = male,
+         No_Degree = no_dgr,
+         Masters = ma,
+         Doctorate = dr,
+         Professor = prof) |>
+  knitr::kable() |>
+  kable_styling()
+  #pivot_wider(names_from = academic_degree:sex,
+             # values_from = count(teacher_id))
+ 
+                
 ```
 
 ::: {.callout-tip}
-If you are interested in exploring my table fomatting, I specifically used the 
+If you are interested in exploring my table formatting, I specifically used the 
 `kable()` function from the **knitr** package to first get an HTML table. Then
 I styled that table using the `kable_styling()` function from the **kableExtra**
 package. 
