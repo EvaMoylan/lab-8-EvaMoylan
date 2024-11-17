@@ -60,8 +60,12 @@ tibble(Variable = names(surveys),
                            .f = ~ typeof(.x))) |>
   pivot_wider(names_from = Variable,
               values_from = Data_Type) |>
-  knitr::kable() |>
-  kable_styling()
+  knitr::kable("html",
+               align = "c") |>
+  #I used the w3schools' Bootstrap Page to figure out how to do borders
+  kable_styling(bootstrap_options = "bordered")
+  
+
 
 ```
 
@@ -80,20 +84,29 @@ list output back into a data frame.
 ```{r}
 #| label: map-to-mutate-columns
 
-evals |>
+evals <- evals |>
   map_at(.at = c("teacher_id",
                  "weekday",
                  "academic_degree",
                  "seniority",
                  "gender"),
          .f = as.factor) |>
-  bind_cols() |>
-  knitr::kable() |>
-  kable_styling()
-  
+  bind_cols()
+
+#Now output the new types
+tibble(Variable = names(evals),
+       Data_Type = map_chr(.x = evals,
+                           .f = ~ typeof(.x))) |>
+  pivot_wider(names_from = Variable,
+              values_from = Data_Type) |>
+  knitr::kable("html",
+               align = "c") |>
+  kable_styling(bootstrap_options = "bordered")
+
 ```
 
 Next up, we're going revisit Question 7 which asked:
+
 > What are the demographics of the instructors in this study? Investigate the
 > variables `academic_degree`, `seniority`, and `sex` and summarize your
 > findings in ~3 complete sentences.
@@ -123,7 +136,8 @@ evals |>
          sex, 
          seniority,
          academic_degree) |>
-  mutate(seniority = if_else(seniority <= 4,
+  mutate(seniority = if_else(as.numeric(seniority) <= 4, 
+                             #Can't apply this to a factor, so convert to numeric
                              "Junior (4 years or less)",
                              "Senior (more than 4 years)")) |>
   pivot_longer(cols = -teacher_id,
@@ -143,16 +157,13 @@ evals |>
          prof) |>
   rename(Female = female,
          Male = male,
-         No_Degree = no_dgr,
+         'No Degree' = no_dgr,
          Masters = ma,
          Doctorate = dr,
          Professor = prof) |>
   knitr::kable() |>
   kable_styling()
-  #pivot_wider(names_from = academic_degree:sex,
-             # values_from = count(teacher_id))
- 
-                
+
 ```
 
 ::: {.callout-tip}
